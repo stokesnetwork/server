@@ -20,7 +20,7 @@ class AddressesActiveRequest(BaseModel):
 
 
 class AddressesActiveResponse(BaseModel):
-    address: str = Field(example="kaspa:qqkqkzjvr7zwxxmjxjkmxxdwju9kjs6e9u82uh59z07vgaks6gg62v8707g73")
+    address: str = Field(example=ADDRESS_EXAMPLE)
     active: bool = Field(example=True)
     lastTxBlockTime: int | None = Field(example=1752924174352)
 
@@ -29,7 +29,7 @@ class AddressesActiveResponse(BaseModel):
     "/addresses/active",
     response_model=List[AddressesActiveResponse],
     response_model_exclude_unset=True,
-    tags=["Kaspa addresses"],
+    tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
 )
 @sql_db_only

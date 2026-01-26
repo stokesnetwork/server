@@ -16,7 +16,7 @@ class HalvingResponse(BaseModel):
     nextHalvingAmount: float = 155.123123
 
 
-@app.get("/info/halving", response_model=HalvingResponse | str, tags=["Kaspa network info"])
+@app.get("/info/halving", response_model=HalvingResponse | str, tags=["Stokes network info"])
 async def get_halving(field: str | None = None):
     """
     Returns information about chromatic halving

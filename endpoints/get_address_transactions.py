@@ -45,14 +45,14 @@ class TransactionForAddressResponse(BaseModel):
     "/addresses/{kaspaAddress}/full-transactions",
     response_model=List[TxModel],
     response_model_exclude_unset=True,
-    tags=["Kaspa addresses"],
+    tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
 )
 @sql_db_only
 async def get_full_transactions_for_address(
     response: Response,
     kaspa_address: str = Path(
-        alias="kaspaAddress", description=f"Kaspa address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS
+        alias="kaspaAddress", description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS
     ),
     limit: int = Query(description="The number of records to get", ge=1, le=500, default=50),
     offset: int = Query(description="The offset from which to get records", ge=0, default=0),
@@ -114,14 +114,14 @@ async def get_full_transactions_for_address(
     "/addresses/{kaspaAddress}/full-transactions-page",
     response_model=List[TxModel],
     response_model_exclude_unset=True,
-    tags=["Kaspa addresses"],
+    tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
 )
 @sql_db_only
 async def get_full_transactions_for_address_page(
     response: Response,
     kaspa_address: str = Path(
-        alias="kaspaAddress", description=f"Kaspa address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS
+        alias="kaspaAddress", description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS
     ),
     limit: int = Query(
         description="The max number of records to get. "

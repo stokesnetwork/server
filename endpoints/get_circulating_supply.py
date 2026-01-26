@@ -14,10 +14,10 @@ class CoinSupplyResponse(BaseModel):
     maxSupply: str = "2900000000000000000"
 
 
-@app.get("/info/coinsupply", response_model=CoinSupplyResponse, tags=["Kaspa network info"])
+@app.get("/info/coinsupply", response_model=CoinSupplyResponse, tags=["Stokes network info"])
 async def get_coinsupply():
     """
-    Get $KAS coin supply information
+    Get Stokes (STKS) coin supply information
     """
     rpc_client = await kaspad_rpc_client()
     if rpc_client:
@@ -34,10 +34,10 @@ async def get_coinsupply():
     }
 
 
-@app.get("/info/coinsupply/circulating", tags=["Kaspa network info"], response_class=PlainTextResponse)
+@app.get("/info/coinsupply/circulating", tags=["Stokes network info"], response_class=PlainTextResponse)
 async def get_circulating_coins(in_billion: bool = False):
     """
-    Get circulating amount of $KAS token as numerical value
+    Get circulating amount of STKS token as numerical value
     """
     coin_supply = await get_coinsupply()
     coins = str(float(coin_supply["circulatingSupply"]) / 100000000)
@@ -47,9 +47,9 @@ async def get_circulating_coins(in_billion: bool = False):
         return coins
 
 
-@app.get("/info/coinsupply/total", tags=["Kaspa network info"], response_class=PlainTextResponse)
+@app.get("/info/coinsupply/total", tags=["Stokes network info"], response_class=PlainTextResponse)
 async def get_total_coins(in_billion: bool = False):
     """
-    Get total amount of $KAS token as numerical value
+    Get total amount of STKS token as numerical value
     """
     return await get_circulating_coins(in_billion)

@@ -26,14 +26,14 @@ class TransactionCount(BaseModel):
 @app.get(
     "/addresses/{kaspaAddress}/transactions-count",
     response_model=TransactionCount,
-    tags=["Kaspa addresses"],
+    tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
 )
 @sql_db_only
 async def get_transaction_count_for_address(
     response: Response,
     kaspa_address: str = Path(
-        alias="kaspaAddress", description=f"Kaspa address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS
+        alias="kaspaAddress", description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS
     ),
 ):
     """

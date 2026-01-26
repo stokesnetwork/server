@@ -4,7 +4,6 @@ from asyncio import wait_for
 from typing import List
 
 from fastapi import Path, HTTPException
-from kaspa_script_address import to_script
 from pydantic import BaseModel
 from starlette.responses import Response
 
@@ -38,21 +37,16 @@ class UtxoResponse(BaseModel):
 @app.get(
     "/addresses/{kaspaAddress}/utxos",
     response_model=List[UtxoResponse],
-    tags=["Kaspa addresses"],
+    tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
 )
 async def get_utxos_for_address(
     response: Response,
-    kaspaAddress: str = Path(description=f"Kaspa address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS),
+    kaspaAddress: str = Path(description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS),
 ):
     """
-    Lists all open utxo for a given kaspa address
+    Lists all open utxo for a given Stokes address
     """
-    try:
-        to_script(kaspaAddress)
-    except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid address: {kaspaAddress}")
-
     utxos = await get_utxos([kaspaAddress])
 
     ttl = 8
@@ -74,12 +68,12 @@ class UtxoRequest(BaseModel):
 @app.post(
     "/addresses/utxos",
     response_model=List[UtxoResponse],
-    tags=["Kaspa addresses"],
+    tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
 )
 async def get_utxos_for_addresses(body: UtxoRequest):
     """
-    Lists all open utxo for a given kaspa address
+    Lists all open utxo for a given Stokes address
     """
     if body.addresses is None:
         return []
@@ -88,7 +82,6 @@ async def get_utxos_for_addresses(body: UtxoRequest):
         try:
             if not re.search(REGEX_KASPA_ADDRESS, kaspaAddress):
                 raise ValueError
-            to_script(kaspaAddress)
         except ValueError:
             raise HTTPException(status_code=400, detail=f"Invalid address: {kaspaAddress}")
 

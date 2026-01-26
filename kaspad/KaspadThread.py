@@ -60,10 +60,14 @@ class KaspadThread(object):
         if wait_for_response:
             try:
                 async for resp in self.stub.MessageStream(self.yield_cmd(command, params), timeout=120):
-                    self.__queue.put_nowait("done")
                     return json_format.MessageToDict(resp, always_print_fields_with_no_presence=True)
             except grpc.aio._call.AioRpcError as e:
                 raise KaspadCommunicationError(str(e))
+            finally:
+                try:
+                    self.__queue.put_nowait("done")
+                except Exception:
+                    pass
 
     async def notify(self, command, params=None, callback_func=None):
         try:
@@ -76,6 +80,11 @@ class KaspadThread(object):
 
         except (grpc.aio._call.AioRpcError, _MultiThreadedRendezvous) as e:
             raise KaspadCommunicationError(str(e))
+        finally:
+            try:
+                self.__queue.put_nowait("done")
+            except Exception:
+                pass
 
     async def yield_cmd(self, cmd, params=None):
         msg = KaspadMessage()
@@ -90,7 +99,10 @@ class KaspadThread(object):
 
         msg2.SetInParent()
         yield msg
-        await self.__queue.get()
+        try:
+            await self.__queue.get()
+        except asyncio.CancelledError:
+            return
 
     def yield_cmd_sync(self, cmd, params=None):
         msg = KaspadMessage()

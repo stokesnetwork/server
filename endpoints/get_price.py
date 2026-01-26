@@ -14,11 +14,11 @@ class PriceResponse(BaseModel):
     price: float = 0.025235
 
 
-@app.get("/info/price", response_model=PriceResponse | str, tags=["Kaspa network info"])
+@app.get("/info/price", response_model=PriceResponse | str, tags=["Stokes network info"])
 @mainnet_only
 async def get_price(stringOnly: bool = False):
     """
-    Returns the current price for Kaspa in USD.
+    Returns the current price for Stokes in USD.
     """
     price = await get_kas_price() if not DISABLE_PRICE else 0
     if stringOnly:
@@ -27,10 +27,10 @@ async def get_price(stringOnly: bool = False):
     return {"price": price}
 
 
-@app.get("/info/market-data", tags=["Kaspa network info"], include_in_schema=False)
+@app.get("/info/market-data", tags=["Stokes network info"], include_in_schema=False)
 @mainnet_only
 async def get_market_data():
     """
-    Returns market data for kaspa.
+    Returns market data for Stokes.
     """
     return await get_kas_market_data() if not DISABLE_PRICE else {}

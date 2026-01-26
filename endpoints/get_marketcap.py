@@ -11,10 +11,10 @@ class MarketCapResponse(BaseModel):
     marketcap: int = 12000132
 
 
-@app.get("/info/marketcap", response_model=MarketCapResponse | str, tags=["Kaspa network info"])
+@app.get("/info/marketcap", response_model=MarketCapResponse | str, tags=["Stokes network info"])
 async def get_marketcap(stringOnly: bool = False):
     """
-    Get $KAS price and market cap. Price info is from coingecko.com
+    Get Stokes (STKS) price and market cap. Price info is from coingecko.com
     """
     kas_price = await get_kas_price()
     coin_supply = await get_coinsupply()

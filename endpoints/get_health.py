@@ -44,7 +44,7 @@ class HealthResponse(BaseModel):
     database: DBCheckStatus
 
 
-@app.get("/info/health", response_model=HealthResponse, tags=["Kaspa network info"])
+@app.get("/info/health", response_model=HealthResponse, tags=["Stokes network info"])
 async def health_state():
     """
     Checks node and database health by comparing blue score and sync status.

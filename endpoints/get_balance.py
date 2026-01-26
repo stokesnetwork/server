@@ -2,7 +2,6 @@
 from asyncio import wait_for
 
 from fastapi import Path, HTTPException
-from kaspa_script_address.kaspa_script_address import to_script
 from pydantic import BaseModel
 
 from constants import ADDRESS_EXAMPLE, REGEX_KASPA_ADDRESS
@@ -15,18 +14,13 @@ class BalanceResponse(BaseModel):
     balance: int = 38240000000
 
 
-@app.get("/addresses/{kaspaAddress}/balance", response_model=BalanceResponse, tags=["Kaspa addresses"])
+@app.get("/addresses/{kaspaAddress}/balance", response_model=BalanceResponse, tags=["Stokes addresses"])
 async def get_balance_from_kaspa_address(
-    kaspaAddress: str = Path(description=f"Kaspa address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS),
+    kaspaAddress: str = Path(description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS),
 ):
     """
-    Get balance for a given kaspa address
+    Get balance for a given Stokes address
     """
-    try:
-        to_script(kaspaAddress)
-    except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid address: {kaspaAddress}")
-
     rpc_client = await kaspad_rpc_client()
     request = {"address": kaspaAddress}
     if rpc_client:

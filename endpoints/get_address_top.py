@@ -28,8 +28,8 @@ class TopAddresses(BaseModel):
 @app.get(
     "/addresses/top",
     response_model=List[TopAddresses],
-    tags=["Kaspa addresses"],
-    summary="EXPERIMENTAL - EXPECT BREAKING CHANGES: Get top Kaspa addresses (rich list)",
+    tags=["Stokes addresses"],
+    summary="EXPERIMENTAL - EXPECT BREAKING CHANGES: Get top Stokes addresses (rich list)",
     description="Get top addresses, use 'before' to get historical data (must be divisible by limit).",
     openapi_extra={"strict_query_params": True},
 )

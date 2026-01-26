@@ -28,10 +28,10 @@ class DistributionTiers(BaseModel):
 @app.get(
     "/addresses/distribution",
     response_model=List[DistributionTiers],
-    tags=["Kaspa addresses"],
-    summary="EXPERIMENTAL - EXPECT BREAKING CHANGES: Get Kaspa address distribution by balance tier",
+    tags=["Stokes addresses"],
+    summary="EXPERIMENTAL - EXPECT BREAKING CHANGES: Get Stokes address distribution by balance tier",
     description="Get address distribution tiers, use 'before' to get historical data (must be divisible by limit).\n\n"
-    "Addresses are grouped by their balance (KAS) in powers of ten. Tier 0:[0.0001..1), 1:[1..10), ..., 10:[1b..10b).",
+    "Addresses are grouped by their balance (STKS) in powers of ten. Tier 0:[0.0001..1), 1:[1..10), ..., 10:[1b..10b).",
     openapi_extra={"strict_query_params": True},
 )
 @sql_db_only

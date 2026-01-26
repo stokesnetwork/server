@@ -10,10 +10,10 @@ class BlockRewardResponse(BaseModel):
     blockreward: float = 12000132
 
 
-@app.get("/info/blockreward", response_model=BlockRewardResponse | str, tags=["Kaspa network info"])
+@app.get("/info/blockreward", response_model=BlockRewardResponse | str, tags=["Stokes network info"])
 async def get_blockreward(stringOnly: bool = False):
     """
-    Returns the current blockreward in KAS/block
+    Returns the current blockreward in STKS/block
     """
     bdi = await get_blockdag()
     daa_score = int(bdi["virtualDaaScore"])

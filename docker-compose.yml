@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    image: stokes-rest-api:dev
+    env_file:
+      - .env
+    environment:
+      - NETWORK_TYPE=${NETWORK_TYPE:-testnet}
+      - KASPAD_HOST_1=${KASPAD_HOST_1}
+      - DISABLE_PRICE=${DISABLE_PRICE:-true}
+      - DEBUG=${DEBUG:-true}
+      - PREV_OUT_RESOLVED=${PREV_OUT_RESOLVED:-false}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    # Uncomment if you enable SQL_URI and want DB-backed endpoints
+    # depends_on:
+    #   - postgres
+
+  # Optional: Postgres for indexer-backed endpoints (address history, etc.)
+  postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    profiles: ["db"]
+
+  # Optional: Simply Kaspa Indexer (requires WRPC ws:// to node)
+  # Enable only if your Stokes node exposes WRPC (typically 17110)
+  indexer:
+    image: supertypo/simply-kaspa-indexer:latest
+    command: >
+      -u
+      -s ${INDEXER_WS_URL}
+      -d postgres://postgres:postgres@postgres:5432/postgres
+      -l 0.0.0.0:8500
+      --prune-db --retention=7d
+      --enable=transactions_inputs_resolve
+      --disable=block_parent_table,blocks_transactions_table,addresses_transactions_table
+      --exclude-fields=block_accepted_id_merkle_root,block_merge_set_blues_hashes,block_merge_set_reds_hashes,block_selected_parent_hash,block_bits,block_blue_work,block_daa_score,block_hash_merkle_root,block_nonce,block_pruning_point,block_utxo_commitment,block_version,tx_hash,tx_mass,tx_payload,tx_in_signature_script,tx_in_sig_op_count,tx_in_block_time,tx_out_script_public_key_address,tx_out_block_time
+    environment:
+      - RUST_LOG=info
+    ports:
+      - "8500:8500"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    profiles: ["indexer"]
+
+volumes:
+  pgdata:

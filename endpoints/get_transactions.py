@@ -119,7 +119,7 @@ class AcceptanceMode(str, Enum):
 @app.get(
     "/transactions/{transactionId}",
     response_model=TxModel,
-    tags=["Kaspa transactions"],
+    tags=["Stokes transactions"],
     response_model_exclude_unset=True,
 )
 @sql_db_only
@@ -227,7 +227,7 @@ async def get_transaction(
 
 
 @app.post(
-    "/transactions/search", response_model=List[TxModel], tags=["Kaspa transactions"], response_model_exclude_unset=True
+    "/transactions/search", response_model=List[TxModel], tags=["Stokes transactions"], response_model_exclude_unset=True
 )
 @sql_db_only
 async def search_for_transactions(
@@ -369,7 +369,7 @@ async def search_for_transactions(
     "/transactions/acceptance",
     response_model=List[TxAcceptanceResponse],
     response_model_exclude_unset=True,
-    tags=["Kaspa transactions"],
+    tags=["Stokes transactions"],
     openapi_extra={"strict_query_params": True},
 )
 @sql_db_only

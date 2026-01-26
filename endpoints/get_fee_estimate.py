@@ -20,10 +20,10 @@ class FeeEstimateResponse(BaseModel):
     lowBuckets: List[FeeEstimateBucket]
 
 
-@app.get("/info/fee-estimate", response_model=FeeEstimateResponse, tags=["Kaspa network info"])
+@app.get("/info/fee-estimate", response_model=FeeEstimateResponse, tags=["Stokes network info"])
 async def get_fee_estimate():
     """
-    Get fee estimate from Kaspad.
+    Get fee estimate from stokesd.
 
     For all buckets, feerate values represent fee/mass of a transaction in `sompi/gram` units.<br>
     Given a feerate value recommendation, calculate the required fee by
@@ -34,6 +34,8 @@ async def get_fee_estimate():
         fee_estimate = await wait_for(rpc_client.get_fee_estimate(), 10)
     else:
         resp = await kaspad_client.request("getFeeEstimateRequest")
+        if resp is None:
+            raise HTTPException(503, "stokesd did not respond")
         if resp.get("error"):
             raise HTTPException(500, resp["error"])
         fee_estimate = resp["getFeeEstimateResponse"]

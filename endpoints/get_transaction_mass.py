@@ -25,7 +25,7 @@ def _get_amount_from_tx_output_index(txs, tx_id, output_index: int):
 @app.post(
     "/transactions/mass",
     response_model=TxMass,
-    tags=["Kaspa transactions"],
+    tags=["Stokes transactions"],
     response_model_exclude_unset=True,
 )
 async def calculate_transaction_mass(tx: SubmitTxModel):

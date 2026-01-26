@@ -44,7 +44,7 @@ from endpoints.kaspad_requests.submit_transaction_request import (
 )
 from helper import get_kas_market_data
 from kaspad.KaspadRpcClient import kaspad_rpc_client
-from server import app, kaspad_client
+from server import app as fastapi_app, kaspad_client, socket_app as app
 
 IS_SQL_DB_CONFIGURED = os.getenv("SQL_URI") is not None
 
@@ -63,7 +63,7 @@ if os.getenv("VSPC_REQUEST") == "true":
     print(get_virtual_selected_parent_chain_from_block)
 
 
-@app.on_event("startup")
+@fastapi_app.on_event("startup")
 async def startup():
     # We don't want to mess with the new filler's views!
     # create db if needed
@@ -83,7 +83,7 @@ async def startup():
         pass
 
 
-@app.get("/", include_in_schema=False)
+@fastapi_app.get("/", include_in_schema=False)
 async def docs_redirect():
     return RedirectResponse(url="/docs")
 

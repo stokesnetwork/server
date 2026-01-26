@@ -13,21 +13,30 @@ HASHRATE_HISTORY = os.getenv("HASHRATE_HISTORY", "false").lower() == "true"
 ADDRESS_RANKINGS = os.getenv("ADDRESS_RANKINGS", "false").lower() == "true"
 
 NETWORK_TYPE = os.getenv("NETWORK_TYPE", "mainnet").lower()
-BPS = int(os.getenv("BPS", "10"))
+BPS = int(os.getenv("BPS", "1"))
+
+if NETWORK_TYPE in {"stokes-mainnet", "stokes_mainnet"}:
+    NETWORK_TYPE = "mainnet"
+elif NETWORK_TYPE in {"stokes-testnet", "stokes_testnet"}:
+    NETWORK_TYPE = "testnet"
+elif NETWORK_TYPE in {"stokes-simnet", "stokes_simnet"}:
+    NETWORK_TYPE = "simnet"
+elif NETWORK_TYPE in {"stokes-devnet", "stokes_devnet"}:
+    NETWORK_TYPE = "devnet"
 
 match NETWORK_TYPE:
     case "mainnet":
-        address_prefix = "kaspa"
-        address_example = "kaspa:qqkqkzjvr7zwxxmjxjkmxxdwju9kjs6e9u82uh59z07vgaks6gg62v8707g73"
+        address_prefix = "stokes"
+        address_example = "stokes:qqcxjzhcxcqmtf9t8ed2lpkfjfse79q9ncafluc3st6znkhpl0g92ck3gd2z2"
     case "testnet":
-        address_prefix = "kaspatest"
-        address_example = "kaspatest:qpqz2vxj23kvh0m73ta2jjn2u4cv4tlufqns2eap8mxyyt0rvrxy6ejkful67"
+        address_prefix = "stokestest"
+        address_example = "stokestest:qpkqllexmwjpaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     case "simnet":
-        address_prefix = "kaspasim"
-        address_example = "kaspasim:qpqz2vxj23kvh0m73ta2jjn2u4cv4tlufqns2eap8mxyyt0rvrxy6ejkful67"
+        address_prefix = "stokessim"
+        address_example = "stokessim:qpkqllexmwjpaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     case "devnet":
-        address_prefix = "kaspadev"
-        address_example = "kaspadev:qpqz2vxj23kvh0m73ta2jjn2u4cv4tlufqns2eap8mxyyt0rvrxy6ejkful67"
+        address_prefix = "stokesdev"
+        address_example = "stokesdev:qpkqllexmwjpaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     case _:
         raise ValueError(f"Network type {NETWORK_TYPE} not supported.")
 

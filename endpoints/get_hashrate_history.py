@@ -36,7 +36,7 @@ _sample_interval_minutes = 15
 _crescendo_blue_score = 108554145
 
 
-@app.get("/info/hashrate/history/{day}", response_model=list[HashrateHistoryResponse], tags=["Kaspa network info"])
+@app.get("/info/hashrate/history/{day}", response_model=list[HashrateHistoryResponse], tags=["Stokes network info"])
 async def get_hashrate_history_for_day(day: date, response: Response):
     """
     Get hashrate history for a specific UTC day (YYYY-MM-DD)
@@ -67,7 +67,7 @@ async def get_hashrate_history_for_day(day: date, response: Response):
         return filter_samples(samples, sample_interval)
 
 
-@app.get("/info/hashrate/history", response_model=list[HashrateHistoryResponse], tags=["Kaspa network info"])
+@app.get("/info/hashrate/history", response_model=list[HashrateHistoryResponse], tags=["Stokes network info"])
 async def get_hashrate_history(
     response: Response, resolution: Optional[str] = Query(default=None, enum=["15m", "1h", "3h", "1d", "7d"])
 ):

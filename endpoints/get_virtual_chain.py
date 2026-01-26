@@ -56,7 +56,7 @@ class VcBlockModel(BaseModel):
 @app.get(
     "/virtual-chain",
     response_model=List[VcBlockModel],
-    tags=["Kaspa virtual chain"],
+    tags=["Stokes virtual chain"],
     summary="EXPERIMENTAL - EXPECT BREAKING CHANGES: Get virtual chain transactions by blue score",
     response_model_exclude_none=True,
     openapi_extra={"strict_query_params": True},

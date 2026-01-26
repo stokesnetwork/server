@@ -17,7 +17,7 @@ class BlueScoreResponse(BaseModel):
     blueScore: int = 260890
 
 
-@app.get("/info/virtual-chain-blue-score", response_model=BlueScoreResponse, tags=["Kaspa network info"])
+@app.get("/info/virtual-chain-blue-score", response_model=BlueScoreResponse, tags=["Stokes network info"])
 async def get_virtual_selected_parent_blue_score():
     """
     Returns the blue score of the sink

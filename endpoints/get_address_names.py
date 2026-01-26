@@ -22,7 +22,7 @@ class AddressName(BaseModel):
 @app.get(
     "/addresses/names",
     response_model=List[AddressName],
-    tags=["Kaspa addresses"],
+    tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
 )
 @sql_db_only
@@ -39,7 +39,7 @@ async def get_addresses_names(response: Response):
 @app.get(
     "/addresses/{kaspaAddress}/name",
     response_model=AddressName | None,
-    tags=["Kaspa addresses"],
+    tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
 )
 @sql_db_only
@@ -47,7 +47,7 @@ async def get_name_for_address(
     response: Response,
     kaspa_address: str = Path(
         alias="kaspaAddress",
-        description="Kaspa address as string e.g. kaspa:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkx9awp4e",
+        description="Stokes address as string e.g. stokes:qqcxjzhcxcqmtf9t8ed2lpkfjfse79q9ncafluc3st6znkhpl0g92ck3gd2z2",
         regex=REGEX_KASPA_ADDRESS,
     ),
 ):
