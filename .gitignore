@@ -111,6 +111,10 @@ ENV/
 env.bak/
 venv.bak/
 
+# Deployment overrides (keep private)
+dockerComposeProd.yml
+caddyFile
+
 # Spyder project settings
 .spyderproject
 .spyproject

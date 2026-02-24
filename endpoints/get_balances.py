@@ -20,8 +20,13 @@ class BalanceRequest(BaseModel):
     addresses: list[str] = [ADDRESS_EXAMPLE]
 
 
-@app.post("/addresses/balances", response_model=List[BalancesByAddressEntry], tags=["Stokes addresses"])
-async def get_balances_from_kaspa_addresses(body: BalanceRequest):
+@app.post(
+    "/addresses/balances",
+    response_model=List[BalancesByAddressEntry],
+    tags=["Stokes addresses"],
+    summary="Get Balances From Stokes Addresses",
+)
+async def get_balances_from_stokes_addresses(body: BalanceRequest):
     """
     Get balances for multiple Stokes addresses
     """
@@ -45,3 +50,7 @@ async def get_balances_from_kaspa_addresses(body: BalanceRequest):
         balances = resp["getBalancesByAddressesResponse"]
 
     return balances["entries"]
+
+
+# Backwards-compatible export for older imports.
+get_balances_from_kaspa_addresses = get_balances_from_stokes_addresses

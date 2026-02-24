@@ -8,16 +8,33 @@ services:
       - .env
     environment:
       - NETWORK_TYPE=${NETWORK_TYPE:-testnet}
-      - KASPAD_HOST_1=${KASPAD_HOST_1}
+      - KASPAD_HOST_1=${KASPAD_HOST_1:-host.docker.internal:17210}
       - DISABLE_PRICE=${DISABLE_PRICE:-true}
       - DEBUG=${DEBUG:-true}
       - PREV_OUT_RESOLVED=${PREV_OUT_RESOLVED:-false}
+      - USE_SCRIPT_FOR_ADDRESS=${USE_SCRIPT_FOR_ADDRESS:-false}
     ports:
       - "8000:8000"
     restart: unless-stopped
     # Uncomment if you enable SQL_URI and want DB-backed endpoints
     # depends_on:
     #   - postgres
+
+  wrpc-proxy:
+    image: supertypo/rusty-kaspa-wrpc-proxy:nightly
+    command: >
+      kaspa-wrpc-proxy
+      ${WRPC_NETWORK_FLAG:-}
+      ${WRPC_VERBOSE_FLAG:-}
+      --encoding ${WRPC_ENCODING:-borsh}
+      --interface ${WRPC_LISTEN_ADDR:-0.0.0.0:17112}
+      ${WRPC_GRPC_URL:-grpc://host.docker.internal:17110}
+    environment:
+      - RUST_LOG=${WRPC_RUST_LOG:-info}
+    ports:
+      - "17112:17112"
+    restart: unless-stopped
+    profiles: ["indexer"]
 
   # Optional: Postgres for indexer-backed endpoints (address history, etc.)
   postgres:
@@ -36,20 +53,20 @@ services:
   # Optional: Simply Kaspa Indexer (requires WRPC ws:// to node)
   # Enable only if your Stokes node exposes WRPC (typically 17110)
   indexer:
-    image: supertypo/simply-kaspa-indexer:latest
-    command: >
-      -u
-      -s ${INDEXER_WS_URL}
-      -d postgres://postgres:postgres@postgres:5432/postgres
-      -l 0.0.0.0:8500
-      --prune-db --retention=7d
-      --enable=transactions_inputs_resolve
-      --disable=block_parent_table,blocks_transactions_table,addresses_transactions_table
-      --exclude-fields=block_accepted_id_merkle_root,block_merge_set_blues_hashes,block_merge_set_reds_hashes,block_selected_parent_hash,block_bits,block_blue_work,block_daa_score,block_hash_merkle_root,block_nonce,block_pruning_point,block_utxo_commitment,block_version,tx_hash,tx_mass,tx_payload,tx_in_signature_script,tx_in_sig_op_count,tx_in_block_time,tx_out_script_public_key_address,tx_out_block_time
+    build: .
+    image: stokes-native-indexer:dev
+    command: poetry run python stokesIndexer.py
+    env_file:
+      - .env
     environment:
-      - RUST_LOG=info
-    ports:
-      - "8500:8500"
+      - NETWORK_TYPE=${NETWORK_TYPE:-testnet}
+      - KASPAD_HOST_1=${KASPAD_HOST_1:-host.docker.internal:17210}
+      - SQL_URI=${SQL_URI:-postgresql+asyncpg://postgres:postgres@postgres:5432/postgres}
+      - SQL_URI_BLOCKS=${SQL_URI_BLOCKS:-postgresql+asyncpg://postgres:postgres@postgres:5432/postgres}
+      - DEBUG=${DEBUG:-true}
+      - USE_SCRIPT_FOR_ADDRESS=${USE_SCRIPT_FOR_ADDRESS:-false}
+      - INDEXER_POLL_SECONDS=${INDEXER_POLL_SECONDS:-2}
+      - INDEXER_BATCH_LIMIT=${INDEXER_BATCH_LIMIT:-0}
     depends_on:
       - postgres
     restart: unless-stopped

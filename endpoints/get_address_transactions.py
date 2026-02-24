@@ -47,6 +47,7 @@ class TransactionForAddressResponse(BaseModel):
     response_model_exclude_unset=True,
     tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
+    include_in_schema=False,
 )
 @sql_db_only
 async def get_full_transactions_for_address(
@@ -63,13 +64,12 @@ async def get_full_transactions_for_address(
     Get all transactions for a given address from database.
     And then get their related full transaction data
     """
-    try:
-        script = to_script(kaspa_address)
-    except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid address: {kaspa_address}")
-
     async with async_session() as s:
         if USE_SCRIPT_FOR_ADDRESS:
+            try:
+                script = to_script(kaspa_address)
+            except ValueError:
+                raise HTTPException(status_code=400, detail=f"Invalid address: {kaspa_address}")
             tx_within_limit_offset = await s.execute(
                 select(TxScriptMapping.transaction_id, TxScriptMapping.block_time)
                 .filter(TxScriptMapping.script_public_key == script)
@@ -111,11 +111,40 @@ async def get_full_transactions_for_address(
 
 
 @app.get(
+    "/addresses/{stokesAddress}/full-transactions",
+    response_model=List[TxModel],
+    response_model_exclude_unset=True,
+    tags=["Stokes addresses"],
+    openapi_extra={"strict_query_params": True},
+)
+@sql_db_only
+async def get_full_transactions_for_stokes_address(
+    response: Response,
+    stokes_address: str = Path(
+        alias="stokesAddress", description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS
+    ),
+    limit: int = Query(description="The number of records to get", ge=1, le=500, default=50),
+    offset: int = Query(description="The offset from which to get records", ge=0, default=0),
+    fields: str = "",
+    resolve_previous_outpoints: PreviousOutpointLookupMode = Query(default="no", description=DESC_RESOLVE_PARAM),
+):
+    return await get_full_transactions_for_address(
+        response=response,
+        kaspa_address=stokes_address,
+        limit=limit,
+        offset=offset,
+        fields=fields,
+        resolve_previous_outpoints=resolve_previous_outpoints,
+    )
+
+
+@app.get(
     "/addresses/{kaspaAddress}/full-transactions-page",
     response_model=List[TxModel],
     response_model_exclude_unset=True,
     tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
+    include_in_schema=False,
 )
 @sql_db_only
 async def get_full_transactions_for_address_page(
@@ -146,12 +175,11 @@ async def get_full_transactions_for_address_page(
     Get all transactions for a given address from database.
     And then get their related full transaction data
     """
-    try:
-        script = to_script(kaspa_address)
-    except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid address: {kaspa_address}")
-
     if USE_SCRIPT_FOR_ADDRESS:
+        try:
+            script = to_script(kaspa_address)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Invalid address: {kaspa_address}")
         query = (
             select(TxScriptMapping.transaction_id, TxScriptMapping.block_time)
             .filter(TxScriptMapping.script_public_key == script)
@@ -237,3 +265,43 @@ async def get_full_transactions_for_address_page(
         max_block_time = max((r.get("block_time") for r in res))
         add_cache_control(None, max_block_time, response)
     return res
+
+
+@app.get(
+    "/addresses/{stokesAddress}/full-transactions-page",
+    response_model=List[TxModel],
+    response_model_exclude_unset=True,
+    tags=["Stokes addresses"],
+    openapi_extra={"strict_query_params": True},
+)
+@sql_db_only
+async def get_full_transactions_for_stokes_address_page(
+    response: Response,
+    stokes_address: str = Path(
+        alias="stokesAddress", description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS
+    ),
+    limit: int = Query(
+        description="The max number of records to get. "
+        "For paging combine with using 'before/after' from oldest previous result. "
+        "Use value of X-Next-Page-Before/-After as long as header is present to continue paging. "
+        "The actual number of transactions returned for each page can be > limit.",
+        ge=1,
+        le=500,
+        default=50,
+    ),
+    before: int = Query(description="Only include transactions with block time before this (epoch-millis)", ge=0, default=0),
+    after: int = Query(description="Only include transactions with block time after this (epoch-millis)", ge=0, default=0),
+    fields: str = "",
+    resolve_previous_outpoints: PreviousOutpointLookupMode = Query(default="no", description=DESC_RESOLVE_PARAM),
+    acceptance: Optional[AcceptanceMode] = Query(default=None),
+):
+    return await get_full_transactions_for_address_page(
+        response=response,
+        kaspa_address=stokes_address,
+        limit=limit,
+        before=before,
+        after=after,
+        fields=fields,
+        resolve_previous_outpoints=resolve_previous_outpoints,
+        acceptance=acceptance,
+    )

@@ -41,6 +41,7 @@ async def get_addresses_names(response: Response):
     response_model=AddressName | None,
     tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
+    include_in_schema=False,
 )
 @sql_db_only
 async def get_name_for_address(
@@ -69,3 +70,21 @@ async def get_name_for_address(
         raise HTTPException(
             status_code=404, detail="Address name not found", headers={"Cache-Control": "public, max-age=600"}
         )
+
+
+@app.get(
+    "/addresses/{stokesAddress}/name",
+    response_model=AddressName | None,
+    tags=["Stokes addresses"],
+    openapi_extra={"strict_query_params": True},
+)
+@sql_db_only
+async def get_name_for_stokes_address(
+    response: Response,
+    stokes_address: str = Path(
+        alias="stokesAddress",
+        description="Stokes address as string e.g. stokes:qqcxjzhcxcqmtf9t8ed2lpkfjfse79q9ncafluc3st6znkhpl0g92ck3gd2z2",
+        regex=REGEX_KASPA_ADDRESS,
+    ),
+):
+    return await get_name_for_address(response=response, kaspa_address=stokes_address)

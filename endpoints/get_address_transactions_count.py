@@ -28,6 +28,7 @@ class TransactionCount(BaseModel):
     response_model=TransactionCount,
     tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
+    include_in_schema=False,
 )
 @sql_db_only
 async def get_transaction_count_for_address(
@@ -39,11 +40,6 @@ async def get_transaction_count_for_address(
     """
     Count the number of transactions associated with this address
     """
-    try:
-        script = to_script(kaspa_address)
-    except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid address: {kaspa_address}")
-
     async with async_session() as s:
         global _table_exists
         if _table_exists is None:
@@ -66,6 +62,10 @@ async def get_transaction_count_for_address(
 
         if _table_exists:
             if USE_SCRIPT_FOR_ADDRESS:
+                try:
+                    script = to_script(kaspa_address)
+                except ValueError:
+                    raise HTTPException(status_code=400, detail=f"Invalid address: {kaspa_address}")
                 result = await s.execute(select(TxScriptCount.count).filter(TxScriptCount.script_public_key == script))
             else:
                 result = await s.execute(select(TxAddrCount.count).filter(TxAddrCount.address == kaspa_address))
@@ -73,6 +73,10 @@ async def get_transaction_count_for_address(
             ttl = 4
         else:
             if USE_SCRIPT_FOR_ADDRESS:
+                try:
+                    script = to_script(kaspa_address)
+                except ValueError:
+                    raise HTTPException(status_code=400, detail=f"Invalid address: {kaspa_address}")
                 result = await s.execute(select(func.count()).filter(TxScriptMapping.script_public_key == script))
             else:
                 result = await s.execute(select(func.count()).filter(TxAddrMapping.address == kaspa_address))
@@ -89,3 +93,19 @@ async def get_transaction_count_for_address(
 
     response.headers["Cache-Control"] = f"public, max-age={ttl}"
     return TransactionCount(total=tx_count or 0)
+
+
+@app.get(
+    "/addresses/{stokesAddress}/transactions-count",
+    response_model=TransactionCount,
+    tags=["Stokes addresses"],
+    openapi_extra={"strict_query_params": True},
+)
+@sql_db_only
+async def get_transaction_count_for_stokes_address(
+    response: Response,
+    stokes_address: str = Path(
+        alias="stokesAddress", description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS
+    ),
+):
+    return await get_transaction_count_for_address(response=response, kaspa_address=stokes_address)

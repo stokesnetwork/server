@@ -39,6 +39,7 @@ class UtxoResponse(BaseModel):
     response_model=List[UtxoResponse],
     tags=["Stokes addresses"],
     openapi_extra={"strict_query_params": True},
+    include_in_schema=False,
 )
 async def get_utxos_for_address(
     response: Response,
@@ -47,7 +48,29 @@ async def get_utxos_for_address(
     """
     Lists all open utxo for a given Stokes address
     """
-    utxos = await get_utxos([kaspaAddress])
+    return await _get_utxos_for_address_impl(response=response, address=kaspaAddress)
+
+
+@app.get(
+    "/addresses/{stokesAddress}/utxos",
+    response_model=List[UtxoResponse],
+    tags=["Stokes addresses"],
+    openapi_extra={"strict_query_params": True},
+)
+async def get_utxos_for_stokes_address(
+    response: Response,
+    stokes_address: str = Path(
+        alias="stokesAddress", description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS
+    ),
+):
+    """
+    Lists all open utxo for a given Stokes address
+    """
+    return await _get_utxos_for_address_impl(response=response, address=stokes_address)
+
+
+async def _get_utxos_for_address_impl(*, response: Response, address: str):
+    utxos = await get_utxos([address])
 
     ttl = 8
     if len(utxos) > 100_000:
@@ -58,7 +81,7 @@ async def get_utxos_for_address(
         ttl = 20
 
     response.headers["Cache-Control"] = f"public, max-age={ttl}"
-    return (utxo for utxo in utxos if utxo["address"] == kaspaAddress)
+    return (utxo for utxo in utxos if utxo["address"] == address)
 
 
 class UtxoRequest(BaseModel):

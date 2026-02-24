@@ -14,15 +14,9 @@ class BalanceResponse(BaseModel):
     balance: int = 38240000000
 
 
-@app.get("/addresses/{kaspaAddress}/balance", response_model=BalanceResponse, tags=["Stokes addresses"])
-async def get_balance_from_kaspa_address(
-    kaspaAddress: str = Path(description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS),
-):
-    """
-    Get balance for a given Stokes address
-    """
+async def _get_balance_for_address(address: str):
     rpc_client = await kaspad_rpc_client()
-    request = {"address": kaspaAddress}
+    request = {"address": address}
     if rpc_client:
         balance = await wait_for(rpc_client.get_balance_by_address(request), 10)
     else:
@@ -31,4 +25,28 @@ async def get_balance_from_kaspa_address(
             raise HTTPException(500, resp["error"])
         balance = resp["getBalanceByAddressResponse"]
 
-    return {"address": kaspaAddress, "balance": balance["balance"]}
+    return {"address": address, "balance": balance["balance"]}
+
+
+@app.get("/addresses/{stokesAddress}/balance", response_model=BalanceResponse, tags=["Stokes addresses"])
+async def get_balance_from_stokes_address(
+    stokes_address: str = Path(
+        alias="stokesAddress", description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS
+    ),
+):
+    """
+    Get balance for a given Stokes address
+    """
+    return await _get_balance_for_address(stokes_address)
+
+
+@app.get(
+    "/addresses/{kaspaAddress}/balance",
+    response_model=BalanceResponse,
+    tags=["Stokes addresses"],
+    include_in_schema=False,
+)
+async def get_balance_from_kaspa_address(
+    kaspaAddress: str = Path(description=f"Stokes address as string e.g. {ADDRESS_EXAMPLE}", regex=REGEX_KASPA_ADDRESS),
+):
+    return await _get_balance_for_address(kaspaAddress)

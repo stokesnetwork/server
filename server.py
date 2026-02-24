@@ -98,11 +98,13 @@ async def ping_server():
     """
     result = PingResponse()
 
+    ping_timeout_seconds = float(os.getenv("PING_TIMEOUT_SECONDS") or "3")
+
     rpc_client = await kaspad_rpc_client()
     if rpc_client:
         result.kaspad.is_wrpc = True
         try:
-            info = await wait_for(rpc_client.get_info(), 10)
+            info = await wait_for(rpc_client.get_info(), ping_timeout_seconds)
             result.kaspad.is_online = True
             result.kaspad.server_version = info["serverVersion"]
             result.kaspad.is_utxo_indexed = info["isUtxoIndexed"]
@@ -112,7 +114,10 @@ async def ping_server():
 
     elif kaspad_client.kaspads:
         try:
-            info = await kaspad_client.kaspads[0].request("getInfoRequest")
+            info = await wait_for(
+                kaspad_client.kaspads[0].request("getInfoRequest", timeout=ping_timeout_seconds),
+                ping_timeout_seconds + 0.5,
+            )
             result.kaspad.is_online = True
             result.kaspad.server_version = info["getInfoResponse"]["serverVersion"]
             result.kaspad.is_utxo_indexed = info["getInfoResponse"]["isUtxoIndexed"]
